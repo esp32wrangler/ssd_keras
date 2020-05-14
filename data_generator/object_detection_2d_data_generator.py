@@ -21,14 +21,13 @@ import numpy as np
 import inspect
 from collections import defaultdict
 import warnings
-import sklearn.utils
+#import sklearn.utils
 from copy import deepcopy
 from PIL import Image
 import cv2
 import csv
 import os
 import sys
-from tqdm import tqdm, trange
 try:
     import h5py
 except ImportError:
@@ -166,8 +165,7 @@ class DataGenerator:
             self.dataset_indices = np.arange(self.dataset_size, dtype=np.int32)
             if load_images_into_memory:
                 self.images = []
-                if verbose: it = tqdm(self.filenames, desc='Loading images into memory', file=sys.stdout)
-                else: it = self.filenames
+                it = self.filenames
                 for filename in it:
                     with Image.open(filename) as image:
                         self.images.append(np.array(image, dtype=np.uint8))
@@ -234,7 +232,7 @@ class DataGenerator:
 
         if self.load_images_into_memory:
             self.images = []
-            if verbose: tr = trange(self.dataset_size, desc='Loading images into memory', file=sys.stdout)
+            if verbose: tr = range(self.dataset_size)
             else: tr = range(self.dataset_size)
             for i in tr:
                 self.images.append(self.hdf5_dataset['images'][i].reshape(self.hdf5_dataset['image_shapes'][i]))
@@ -243,7 +241,7 @@ class DataGenerator:
             self.labels = []
             labels = self.hdf5_dataset['labels']
             label_shapes = self.hdf5_dataset['label_shapes']
-            if verbose: tr = trange(self.dataset_size, desc='Loading labels', file=sys.stdout)
+            if verbose: tr = range(self.dataset_size)
             else: tr = range(self.dataset_size)
             for i in tr:
                 self.labels.append(labels[i].reshape(label_shapes[i]))
@@ -251,7 +249,7 @@ class DataGenerator:
         if self.hdf5_dataset.attrs['has_image_ids']:
             self.image_ids = []
             image_ids = self.hdf5_dataset['image_ids']
-            if verbose: tr = trange(self.dataset_size, desc='Loading image IDs', file=sys.stdout)
+            if verbose: tr = range(self.dataset_size)
             else: tr = range(self.dataset_size)
             for i in tr:
                 self.image_ids.append(image_ids[i])
@@ -259,7 +257,7 @@ class DataGenerator:
         if self.hdf5_dataset.attrs['has_eval_neutral']:
             self.eval_neutral = []
             eval_neutral = self.hdf5_dataset['eval_neutral']
-            if verbose: tr = trange(self.dataset_size, desc='Loading evaluation-neutrality annotations', file=sys.stdout)
+            if verbose: tr = range(self.dataset_size)
             else: tr = range(self.dataset_size)
             for i in tr:
                 self.eval_neutral.append(eval_neutral[i])
@@ -322,7 +320,8 @@ class DataGenerator:
 
         data = []
 
-        with open(self.labels_filename, newline='') as csvfile:
+        #with open(self.labels_filename, newline='') as csvfile:
+        with open(self.labels_filename) as csvfile:
             csvread = csv.reader(csvfile, delimiter=',')
             next(csvread) # Skip the header row.
             for row in csvread: # For every line (i.e for every bounding box) in the CSV file...
@@ -388,8 +387,7 @@ class DataGenerator:
         self.dataset_indices = np.arange(self.dataset_size, dtype=np.int32)
         if self.load_images_into_memory:
             self.images = []
-            if verbose: it = tqdm(self.filenames, desc='Loading images into memory', file=sys.stdout)
-            else: it = self.filenames
+            it = self.filenames
             for filename in it:
                 with Image.open(filename) as image:
                     self.images.append(np.array(image, dtype=np.uint8))
@@ -466,8 +464,7 @@ class DataGenerator:
                 image_ids = [line.strip() for line in f] # Note: These are strings, not integers.
                 self.image_ids += image_ids
 
-            if verbose: it = tqdm(image_ids, desc="Processing image set '{}'".format(os.path.basename(image_set_filename)), file=sys.stdout)
-            else: it = image_ids
+            it = image_ids
 
             # Loop over all images in this dataset.
             for image_id in it:
@@ -530,8 +527,7 @@ class DataGenerator:
         self.dataset_indices = np.arange(self.dataset_size, dtype=np.int32)
         if self.load_images_into_memory:
             self.images = []
-            if verbose: it = tqdm(self.filenames, desc='Loading images into memory', file=sys.stdout)
-            else: it = self.filenames
+            it = self.filenames
             for filename in it:
                 with Image.open(filename) as image:
                     self.images.append(np.array(image, dtype=np.uint8))
@@ -612,8 +608,7 @@ class DataGenerator:
                 for annotation in annotations['annotations']:
                     image_ids_to_annotations[annotation['image_id']].append(annotation)
 
-            if verbose: it = tqdm(annotations['images'], desc="Processing '{}'".format(os.path.basename(annotations_filename)), file=sys.stdout)
-            else: it = annotations['images']
+            it = annotations['images']
 
             # Loop over all images in this dataset.
             for img in it:
@@ -655,8 +650,7 @@ class DataGenerator:
         self.dataset_indices = np.arange(self.dataset_size, dtype=np.int32)
         if self.load_images_into_memory:
             self.images = []
-            if verbose: it = tqdm(self.filenames, desc='Loading images into memory', file=sys.stdout)
-            else: it = self.filenames
+            it = self.filenames
             for filename in it:
                 with Image.open(filename) as image:
                     self.images.append(np.array(image, dtype=np.uint8))
@@ -773,7 +767,7 @@ class DataGenerator:
             hdf5_dataset.attrs.modify(name='has_eval_neutral', value=True)
 
         if verbose:
-            tr = trange(dataset_size, desc='Creating HDF5 dataset', file=sys.stdout)
+            tr = range(dataset_size)
         else:
             tr = range(dataset_size)
 
@@ -781,7 +775,9 @@ class DataGenerator:
         for i in tr:
 
             # Store the image.
-            with Image.open(self.filenames[i]) as image:
+            #with Image.open(self.filenames[i]) as image:
+            with open(self.filenames[i], 'rb') as fin:
+                image = Image.open(fin)
 
                 image = np.asarray(image, dtype=np.uint8)
 
@@ -930,7 +926,7 @@ class DataGenerator:
         # Do a few preparatory things like maybe shuffling the dataset initially.
         #############################################################################################
 
-        if shuffle:
+        if False:
             objects_to_shuffle = [self.dataset_indices]
             if not (self.filenames is None):
                 objects_to_shuffle.append(self.filenames)
@@ -972,7 +968,7 @@ class DataGenerator:
             # Maybe shuffle the dataset if a full pass over the dataset has finished.
             #########################################################################################
 
-                if shuffle:
+                if False:
                     objects_to_shuffle = [self.dataset_indices]
                     if not (self.filenames is None):
                         objects_to_shuffle.append(self.filenames)

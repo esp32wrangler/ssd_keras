@@ -96,3 +96,11 @@ ENV/
 
 # Ignore any files and directories that begin with the word "local"
 local*
+.idea/inspectionProfiles/profiles_settings.xml
+infiles/
+outfiles/
+.idea/
+VGG_coco_SSD_300x300_iter_400000.h5
+VGG_coco_mine.h5
+val_imgs.h5
+train_imgs.h5
