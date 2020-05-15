@@ -67,7 +67,7 @@ offsets = None # In case you'd like to set the offsets for the anchor box grids 
 clip_boxes = False # Whether or not to clip the anchor boxes to lie entirely within the image boundaries
 variances = [1.0, 1.0, 1.0, 1.0] # The list of variances by which the encoded target coordinates are scaled
 normalize_coords = True # Whether or not the model is supposed to use coordinates relative to the image size
-model_path = 'ssd7_0.69.h5'
+model_path = 'golden_ssd7_epoch-07_loss-0.9581_val_loss-0.8201.h5'
 
 # We need to create an SSDLoss object in order to pass that to the model loader.
 ssd_loss = SSDLoss(neg_pos_ratio=3, alpha=1.0)

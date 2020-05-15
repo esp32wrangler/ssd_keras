@@ -104,3 +104,4 @@ VGG_coco_SSD_300x300_iter_400000.h5
 VGG_coco_mine.h5
 val_imgs.h5
 train_imgs.h5
+outfiles082/
